@@ -202,6 +202,17 @@ function render(limit) {
             })
             .join("");
 
+    
+            if(limit === "10")
+            {
+               container.insertAdjacentHTML("beforeend", `
+                <div class="more" style="text-align:center; margin-top: 8px;">
+                    <button class="filter" onclick="document.querySelector('.filter[data-limit=\\'all\\']').click()">
+                        See more
+                    </button>
+                </div>
+            `);
+            }
 
     attachStarHandlers();
 }
