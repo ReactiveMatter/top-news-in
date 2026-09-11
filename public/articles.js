@@ -110,14 +110,21 @@ function render(limit) {
 
     } else if (limit === "editorial") {
 
-        // Editorial filtering will be added later.
-
         visibleArticles = articles.filter(article =>
             article.url.includes("/opinion/") ||
             article.url.includes("/editorial/")
         );
 
-    } else {
+    } else if (limit === "explained") {
+
+       
+        visibleArticles = articles.filter(article =>
+            article.url.includes("/explained/")
+        );
+
+    }
+    
+    else {
 
         visibleArticles =
             articles;
