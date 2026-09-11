@@ -1,0 +1,724 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+
+
+<meta
+    name="viewport"
+    content="width=device-width, initial-scale=1"
+>
+
+<title>Top News India</title>
+
+<style>
+    * {
+        box-sizing: border-box;
+    }
+
+    body {
+        margin: 0;
+        min-height: 100vh;
+
+        background: #fff;
+
+        color: #172033;
+
+        font-family:
+            system-ui,
+            -apple-system,
+            BlinkMacSystemFont,
+            "Segoe UI",
+            sans-serif;
+    }
+
+    .container {
+        width: min(920px, 100%);
+        margin: 0 auto;
+        padding: 42px 20px 70px;
+    }
+
+    /* HEADER */
+
+    .header {
+        margin-bottom: 30px;
+    }
+
+    .brand-mark {
+        display: flex;
+        gap: 4px;
+        margin-bottom: 12px;
+    }
+
+    .brand-mark span {
+        width: 22px;
+        height: 5px;
+        border-radius: 10px;
+    }
+
+    .brand-mark .saffron {
+        background: #f47b20;
+    }
+
+    .brand-mark .blue {
+        width: 5px;
+        height: 5px;
+        margin-left: 8px;
+        margin-right: 8px;
+        border-radius: 50%;
+
+        background: #000080;
+    }
+
+    .brand-mark .green {
+        background: #159a61;
+    }
+
+    h1 {
+        margin: 0;
+
+        color: #172033;
+
+        font-family:
+            Georgia,
+            "Times New Roman",
+            serif;
+
+        font-size: clamp(34px, 6vw, 48px);
+        font-weight: 700;
+        letter-spacing: -1.5px;
+        line-height: 1.05;
+    }
+
+    .subtitle {
+        margin: 10px 0 0;
+
+        color: #667085;
+
+        font-size: 15px;
+    }
+
+    /* TOOLBAR */
+
+    .toolbar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+
+        gap: 15px;
+        margin-bottom: 24px;
+    }
+
+    .filters {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        flex-wrap: wrap;
+    }
+
+    .filter,.nav-button {
+        padding: 9px 17px;
+
+        border: 1px solid #dfe3e8;
+        border-radius: 999px;
+
+        background: rgba(255, 255, 255, 0.8);
+        color: #344054;
+
+        cursor: pointer;
+
+        font-size: 13px;
+
+        transition:
+            transform 0.18s ease,
+            background 0.18s ease,
+            border-color 0.18s ease,
+            color 0.18s ease;
+
+        box-shadow:
+            0 2px 8px rgba(20, 30, 50, 0.04);
+    }
+
+    .filter:hover {
+        background: #fff;
+        border-color: #c9cfd8;
+    }
+
+    .filter.active {
+        background: #172033;
+        color: #fff;
+        border-color: #172033;
+
+        box-shadow:
+            0 5px 14px rgba(23, 32, 51, 0.16);
+    }
+
+    .nav-button 
+    {
+        text-decoration: none;
+    }
+
+    .status {
+        display: flex;
+        align-items: center;
+        gap: 7px;
+
+        color: #667085;
+        font-size: 12px;
+        white-space: nowrap;
+    }
+
+    .status-dot {
+        width: 7px;
+        height: 7px;
+
+        border-radius: 50%;
+
+        background: #18a66a;
+
+        box-shadow:
+            0 0 0 4px rgba(24, 166, 106, 0.1);
+    }
+
+    /* ALERTS */
+    .alert {
+            position: fixed;
+
+            top: 20px;
+            left: 50%;
+
+            transform: translateX(-50%);
+
+            padding: 12px 18px;
+
+            border-radius: 10px;
+
+            font-size: 14px;
+            font-weight: 600;
+
+            z-index: 1000;
+
+            box-shadow:
+                0 6px 20px rgba(0, 0, 0, 0.12);
+        }
+
+        .alert.success {
+            background: #eaf8f1;
+            color: #087443;
+            border: 1px solid #b8e5cf;
+        }
+
+        .alert.error {
+            background: #fff0f0;
+            color: #b42318;
+            border: 1px solid #f3c1bd;
+        }
+
+    /* ARTICLES */
+
+    .articles {
+        display: flex;
+        flex-direction: column;
+        gap: 11px;
+    }
+
+    /* ARTICLE CARD */
+
+    .card {
+        position: relative;
+
+        display: grid;
+
+        grid-template-columns:
+            58px
+            minmax(0, 1fr)
+            70px;
+
+        align-items: center;
+        gap: 17px;
+
+        min-height: 125px;
+        padding: 20px 18px 17px;
+
+        overflow: hidden;
+
+        background:
+            rgba(255, 255, 255, 0.92);
+
+        border:
+            1px solid rgba(20, 30, 50, 0.075);
+
+        border-radius: 18px;
+
+        box-shadow:
+            0 5px 20px rgba(20, 30, 50, 0.055);
+
+        transition:
+            transform 0.18s ease,
+            box-shadow 0.18s ease,
+            border-color 0.18s ease;
+    }
+
+    .card::before {
+        content: "";
+
+        position: absolute;
+
+        top: 0;
+        bottom: 0;
+        left: 0;
+
+        width: 4px;
+
+        background:
+            linear-gradient(
+                to bottom,
+                #f47b20,
+                #f9a24b
+            );
+    }
+
+    .date {
+    margin-top: 8px;
+
+    color: #e56612;
+
+    font-size: 13px;
+    font-weight: 700;
+
+    letter-spacing: 0.3px;
+    }
+
+
+    /* RANK */
+
+    .rank {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        width: 52px;
+        height: 52px;
+
+        border-radius: 15px;
+
+        background:
+            linear-gradient(
+                145deg,
+                #fff0df,
+                #fff8f0
+            );
+
+        color: #e56612;
+
+        font-family:
+            Georgia,
+            "Times New Roman",
+            serif;
+
+        font-size: 21px;
+        font-weight: 700;
+    }
+
+    /* CONTENT */
+
+    .content {
+        min-width: 0;
+    }
+
+    .title {
+        display: block;
+
+        color: #172033;
+
+        text-decoration: none;
+
+        font-family:
+            Georgia,
+            "Times New Roman",
+            serif;
+
+        font-size: 19px;
+        font-weight: 700;
+
+        line-height: 1.35;
+        letter-spacing: -0.15px;
+    }
+
+    .title:hover {
+        color: #d85e0d;
+    }
+
+    /* META */
+
+    .meta {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+
+        margin-top: 10px;
+
+        color: #8a93a3;
+        font-size: 12px;
+    }
+
+    .meta-item {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+    }
+
+    .meta-item.votes {
+        color: #e56612;
+        font-weight: 650;
+    }
+
+    .meta-divider {
+        width: 3px;
+        height: 3px;
+
+        border-radius: 50%;
+
+        background: #c5cbd4;
+    }
+
+    /* VOTE */
+
+    .vote-area {
+        display: flex;
+        flex-direction: column;
+
+        align-items: center;
+        justify-content: center;
+
+        gap: 4px;
+    }
+
+    .star {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        width: 48px;
+        height: 48px;
+
+        padding: 0;
+
+        border: 1px solid #e1e5ea;
+        border-radius: 50%;
+
+        background: #fff;
+        color: #8b94a3;
+
+        cursor: pointer;
+
+        font-size: 25px;
+        line-height: 1;
+
+        transition:
+            transform 0.16s ease,
+            background 0.16s ease,
+            border-color 0.16s ease,
+            color 0.16s ease;
+    }
+
+    .star:hover {
+        transform: scale(1.07);
+
+        color: #f47b20;
+
+        border-color:
+            rgba(244, 123, 32, 0.35);
+
+        background: #fff8f2;
+    }
+
+    .star.active {
+        color: #f47b20;
+
+        border-color:
+            rgba(244, 123, 32, 0.35);
+
+        background: #fff4e8;
+    }
+
+   .star {
+    position: relative;
+}
+
+.star.processing {
+    pointer-events: none;
+    cursor: wait;
+}
+
+.star.processing::before {
+    content: "";
+
+    position: absolute;
+
+    inset: -2px;
+
+    border: 2px solid transparent;
+    border-top-color: #f47b20;
+
+    border-radius: 50%;
+
+    animation: border-spin 0.7s linear infinite;
+}
+
+@keyframes border-spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+    .vote-label {
+        color: #98a1af;
+
+        font-size: 10px;
+        font-weight: 600;
+
+        text-transform: uppercase;
+        letter-spacing: 0.6px;
+    }
+
+    /* EMPTY */
+
+    .empty {
+        padding: 70px 20px;
+
+        text-align: center;
+
+        color: #8a93a3;
+
+        background:
+            rgba(255, 255, 255, 0.7);
+
+        border:
+            1px dashed #d8dde5;
+
+        border-radius: 18px;
+    }
+
+    /* FOOTER */
+
+    .footer {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        gap: 12px;
+
+        margin-top: 32px;
+
+        color: #98a1af;
+        font-size: 12px;
+    }
+
+    .footer-line {
+        width: 45px;
+        height: 1px;
+
+        background: #d9dee5;
+    }
+
+    .footer-link 
+    {
+        text-decoration: none;
+        color:#98a1af;
+    }
+    .footer-link:hover 
+    {
+        text-decoration: underline;
+    }
+    /* MOBILE */
+
+    @media (max-width: 650px) {
+
+        .container {
+            padding: 28px 12px 50px;
+        }
+
+        .header {
+            margin-bottom: 24px;
+        }
+
+        .toolbar {
+            align-items: flex-start;
+            flex-direction: column;
+            margin-bottom: 18px;
+        }
+
+        .status {
+            padding-left: 4px;
+        }
+
+        .card {
+            grid-template-columns:
+                40px
+                minmax(0, 1fr)
+                50px;
+
+            gap: 11px;
+
+            min-height: 112px;
+
+            padding:
+                16px 12px 15px;
+        }
+
+        .rank {
+            width: 38px;
+            height: 38px;
+
+            border-radius: 11px;
+
+            font-size: 16px;
+        }
+
+        .title {
+            font-size: 16px;
+            line-height: 1.38;
+        }
+
+        .meta {
+            gap: 8px;
+            margin-top: 9px;
+            font-size: 11px;
+        }
+
+        .star {
+            width: 42px;
+            height: 42px;
+            font-size: 22px;
+        }
+
+        .vote-label {
+            display: none;
+        }
+    }
+
+    @media (max-width: 400px) {
+
+        .filters {
+            gap: 6px;
+        }
+
+        .filter, .nav-button {
+            padding: 8px 13px;
+            font-size: 12px;
+        }
+
+        .card {
+            grid-template-columns:
+                34px
+                minmax(0, 1fr)
+                44px;
+
+            gap: 9px;
+        }
+
+        .rank {
+            width: 34px;
+            height: 34px;
+            font-size: 14px;
+        }
+
+        .title {
+            font-size: 15px;
+        }
+    }
+</style>
+
+
+</head>
+
+<body>
+
+
+<div class="container">
+
+    <header class="header">
+
+        <div class="brand-mark">
+            <span class="saffron"></span>
+            <span class="blue"></span>
+            <span class="green"></span>
+        </div>
+
+        <h1>Top News India</h1>
+        <div class="date" id="current-date"></div>
+        <p class="subtitle">
+            The stories that matter, ranked by readers.
+        </p>
+
+    </header>
+
+
+    <div class="toolbar">
+
+        <div class="filters">
+
+            <button
+                class="filter active"
+                data-limit="10"
+            >
+                Top 10
+            </button>
+
+            <button
+                class="filter"
+                data-limit="all"
+            >
+                All
+            </button>
+
+            <button
+                class="filter"
+                data-limit="editorial"
+            >
+                Editorial
+            </button>
+            <a
+                class="nav-button"
+                href="./about.html"
+            >
+            About   
+        </a>
+
+        </div>
+
+    </div>
+
+
+    <main
+        id="articles"
+        class="articles"
+    ><div class="empty">
+        Loading ...
+    </div></main>
+
+
+    <div class="footer">
+
+        <span class="footer-line"></span>
+
+        <span>
+            Stay informed. Stay curious.
+        </span>
+
+        <span class="footer-line"></span>
+
+    </div>
+
+</div>
+
+
+<script src="/articles.js"></script>
+
+
+</body>
+
+</html>

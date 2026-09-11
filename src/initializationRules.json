@@ -1,0 +1,84 @@
+{
+    "national_politics": {
+        "keywords": [
+            "prime minister",
+            "parliament",
+            "supreme court",
+            "president of india"
+        ],
+        "score": 2
+    },
+    "major_policy": {
+        "keywords": [
+            "new law",
+            "bill passed",
+            "cabinet approves",
+            "major policy",
+            "constitutional amendment"
+        ],
+        "score": 3
+    },
+    "economy": {
+        "keywords": [
+            "rbi",
+            "budget",
+            "gst",
+            "inflation",
+            "repo rate",
+            "rupee"
+        ],
+        "score": 2
+    },
+    "national_security": {
+        "keywords": [
+            "army",
+            "navy",
+            "air force",
+            "defence",
+            "border",
+            "terror attack",
+            "national security"
+        ],
+        "score": 3
+    },
+    "disaster": {
+        "keywords": [
+            "earthquake",
+            "cyclone",
+            "flood",
+            "landslide",
+            "train accident",
+            "plane crash",
+            "bridge collapse"
+        ],
+        "score": 3
+    },
+    "elections": {
+        "keywords": [
+            "election commission",
+            "election results",
+            "assembly election",
+            "lok sabha election"
+        ],
+        "score": 2
+    },
+    "science": {
+        "keywords": [
+            "isro",
+            "space mission",
+            "satellite",
+            "moon mission",
+            "mars mission"
+        ],
+        "score": 2
+    },
+    "public_health": {
+        "keywords": [
+            "epidemic",
+            "pandemic",
+            "outbreak",
+            "emergency"
+        ],
+        "score": 3
+    }
+}

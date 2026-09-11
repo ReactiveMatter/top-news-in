@@ -1,0 +1,52 @@
+/**
+ * For more details on how to configure Wrangler, refer to:
+ * https://developers.cloudflare.com/workers/wrangler/configuration/
+ */
+{
+	"$schema": "node_modules/wrangler/config-schema.json",
+	"name": "top-news-in",
+	"main": "src/index.js",
+	"compatibility_date": "2026-09-07",
+	"observability": {
+		"enabled": true
+	},
+	"assets": {
+		"directory": "./public",
+		"binding": "ASSETS"
+	},
+	"upload_source_maps": true,
+	"d1_databases": [
+		{
+			"binding": "DB",
+			"database_name": "news-db",
+			"database_id": "e74b5ce3-1470-4f8a-9146-61af890f1926"
+		}
+	],
+	"queues": {
+		"producers": [
+			{
+				"binding": "PARSED_ARTICLES_QUEUE",
+				"queue": "parsed-articles"
+			},
+			{
+				"binding": "INITIALIZED_ARTICLES_QUEUE",
+				"queue": "initialized-articles"
+			}
+		],
+		"consumers": [
+			{
+				"queue": "parsed-articles",
+				"max_batch_size": 1
+			},
+			{
+				"queue": "initialized-articles",
+				"max_batch_size": 1
+			}
+		]
+	},
+	"triggers": {
+		"crons": [
+			"30 0 * * *"
+		]
+	}
+}
