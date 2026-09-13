@@ -158,15 +158,10 @@ export default {
 
                 } catch (error) {
 
-                    console.error(
-                        "Article fetch failed:",
-                        error
-                    );
-
                     return Response.json(
                         {
                             success: false,
-                            message: "Failed to fetch article."
+                            message: error.message
                         },
                         { status: 500 }
                     );

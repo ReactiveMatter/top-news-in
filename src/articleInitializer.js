@@ -34,11 +34,12 @@ function calculateInitialVotes(article) {
     let score = 0;
 
     for (const rule of Object.values(initializationRules)) {
-
+        let thisRuleScore = 0;
         for (const keyword of rule.keywords) {
 
             if (text.includes(keyword)) {
                 score += rule.score;
+                thisRuleScore += rule.score;
                 break;
             }
         }

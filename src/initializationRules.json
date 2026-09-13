@@ -34,7 +34,7 @@
             "forex",
             "gdp"
         ],
-        "score": 3
+        "score": 2
     },
     "national_security": {
         "keywords": [
@@ -48,7 +48,7 @@
             "drone attack",
             "cyber security"
         ],
-        "score": 3
+        "score": 2
     },
      "foreign_policy": {
         "keywords": [
@@ -60,7 +60,7 @@
             "putin",
             "iran"
         ],
-        "score": 3
+        "score": 1
     },
     "disaster": {
         "keywords": [

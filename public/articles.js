@@ -1,9 +1,72 @@
 
+import {navigate, resolve, route} from "./router.js"
+
 // ==================================================
 // ARTICLES UI
 // ==================================================
 
+
 let articles = [];
+let articlesLoaded = false;
+
+route('/', ({params, query})=>{
+
+    setFilter('10');
+    setView("article-list");
+    loadArticles();
+
+});
+
+route('/all', ({params, query})=>{
+    setFilter('all');
+    setView("article-list");
+    loadArticles('all');
+});
+
+route('/editorial', ({params, query})=>{
+    setFilter('editorial');
+    setView("article-list");
+    loadArticles('editorial');
+});
+
+route('/explained', ({params, query})=>{
+    setFilter('explained');
+    setView("article-list");
+
+    loadArticles('explained');
+});
+
+route('/article/:url', ({params, query})=>{
+    setView("article-view");
+    if(params.url)
+    {
+        displayArticle(params.url);
+    }
+    else 
+    {
+        document.querySelector("#article-root").innerHTML(`<div class="empty">URL is required.</div>`);
+    }
+    
+});
+
+function setView(mode="article-list")
+{
+    if (mode === "article-list")
+    {
+    document.querySelectorAll("#article-root").forEach((e)=>{ e.style.display = "none"});
+    document.querySelectorAll(".articles").forEach((e)=>{ e.style.display = "flex"});
+    document.querySelectorAll("header").forEach((e)=>{ e.style.display = "block"});
+    document.querySelectorAll(".toolbar").forEach((e)=>{ e.style.display = "block"});
+    }
+    else if(mode === "article-view")
+    {
+    document.querySelectorAll("#article-root").forEach((e)=>{ e.style.display = "block"});
+    document.querySelectorAll(".articles").forEach((e)=>{ e.style.display = "none"});
+    document.querySelectorAll("header").forEach((e)=>{ e.style.display = "none"});
+    document.querySelectorAll(".toolbar").forEach((e)=>{ e.style.display = "none"});
+    }
+}
+
 
 const container =
     document.getElementById("articles");
@@ -58,8 +121,18 @@ function showAlert(success, message) {
 // LOAD ARTICLES
 // ==================================================
 
-async function loadArticles() {
+async function loadArticles(filter) {
 
+    if(!filter) 
+    {
+        filter = '10';
+    }
+
+   if(articlesLoaded)
+   {
+        render(filter);
+        return;
+   }
     try {
 
         const response =
@@ -74,7 +147,8 @@ async function loadArticles() {
         articles =
             await response.json();
 
-        render("10");
+        articlesLoaded = true;
+        render(filter);
 
     } catch (error) {
 
@@ -87,7 +161,6 @@ async function loadArticles() {
         `;
     }
 }
-
 
 // ==================================================
 // RENDER
@@ -112,6 +185,7 @@ function render(limit) {
 
         visibleArticles = articles.filter(article =>
             article.url.includes("/opinion/") ||
+            article.title.includes("Column |") ||
             article.url.includes("/editorial/")
         );
 
@@ -157,14 +231,14 @@ function render(limit) {
 
                         <div class="content">
 
-                            <a
+                            <span
                                 class="title"
-                                href="${escapeHTML(article.url)}"
-                                target="_blank"
-                                rel="noopener noreferrer"
+                                data-url="${escapeHTML(article.url)}"
+                                data-id="${article.id}"
+                
                             >
                                 ${escapeHTML(article.title)}
-                            </a>
+                            </span>
 
 
                             <div class="meta">
@@ -220,8 +294,6 @@ function render(limit) {
                 </div>
             `);
             }
-
-    attachStarHandlers();
 }
 
 
@@ -273,32 +345,6 @@ function formatPublishedTime(value) {
             hour12: true
         }
     ).format(date);
-}
-
-
-// ==================================================
-// STAR HANDLERS
-// ==================================================
-
-function attachStarHandlers() {
-
-    document
-        .querySelectorAll(".star")
-        .forEach(button => {
-
-            button.addEventListener(
-                "click",
-                () => {
-
-                    vote(
-                        button.dataset.id,
-                        button
-                    );
-
-                }
-            );
-
-        });
 }
 
 
@@ -386,12 +432,12 @@ async function vote(articleId, button) {
 
 
     } catch (error) {
-
+         
         showAlert(
                 false,
                 "Vote failed"
             );
-
+        button.classList.remove("processing");
         button.disabled = false;
     }
 }
@@ -418,27 +464,36 @@ function getActiveFilter() {
 // FILTERS
 // ==================================================
 
+function setFilter(f)
+{
+    filters.forEach(filter => {
+        if(filter.dataset.limit === f)
+        {
+            filter.classList.add('active');
+        }
+        else
+        {
+             filter.classList.remove('active');
+        }
+    });
+
+}
+
 filters.forEach(filter => {
 
     filter.addEventListener(
         "click",
         () => {
 
-            filters.forEach(button =>
-                button.classList.remove(
-                    "active"
-                )
-            );
 
-
-            filter.classList.add(
-                "active"
-            );
-
-
-            render(
-                filter.dataset.limit
-            );
+            if(filter.dataset.limit === '10')
+            {
+                 navigate('/');
+            }
+            else
+            {
+                 navigate('/'+filter.dataset.limit);
+            }    
 
         }
     );
@@ -573,10 +628,200 @@ function isArticleStarred(articleId) {
 }
 
 // ==================================================
+// Display article
+// ==================================================
+async function displayArticle(articleUrl) {
+
+    if(!articlesLoaded)
+    {
+        await loadArticles();
+        console.log(articles);
+    }
+
+   const articleRoot = document.getElementById("article-root");
+
+   const article =
+    articles.find(article => {
+        if (article.url === articleUrl) {
+            return true;
+        }
+
+
+        return false;
+    });
+
+
+    if (!article) {
+        articleRoot.innerHTML =
+            `<div class="empty">Article not found</div>`;
+        return;
+    }
+
+    const title =
+        article.title;
+
+    const url =
+        articleUrl;
+    
+    const starred =  isArticleStarred(Number(article.id));
+    const starButton = `
+     <button
+    class="star ${starred ? "active" : ""}"
+    data-id="${article.id}"
+    aria-label="Vote for article"
+    title="${starred ? "Already voted" : "Vote"}"
+    ${starred ? "disabled" : ""}
+    >
+    ${starred ? "★" : "☆"}
+    </button>`;
+
+    const articleHead =
+        `<h2 class="article-title">${title}</h2>`;
+    const hostname = new URL(url).hostname;
+    const backButton = `<span class="nav-button" id="back-button" onclick=history.back();>Back</span>`;
+    const home = `<a class="nav-button" href="/">Home</a>`;
+
+    let nav = ``;
+
+    const referrer = document.referrer;
+
+    if (referrer.startsWith(window.location.origin)) {
+        nav = backButton;
+    }
+    else 
+    {
+        nav = home;
+    }
+
+    const myToolbar = 
+        `<div class="article-toolbar"> 
+        ${nav} 
+        <a href="${url}" class="nav-button">Read on ${hostname}</a>
+        ${starButton}
+        </div>`;
+
+    articleRoot.innerHTML =
+        articleHead + myToolbar +
+        `<div class="empty">Loading article ...</div>`;
+
+    try {
+
+        const response =
+            await fetch(
+                "/fetch?url=" +url
+            );
+
+        const result =
+            await response.json();
+
+        if (!result.success) {
+            articleRoot.innerHTML =
+                articleHead + myToolbar +
+                `<div class="empty">
+                    ${result.message || "Cannot load article"}
+                </div>`;
+
+            return;
+        }
+
+        const parser =
+            new DOMParser();
+
+        const doc =
+            parser.parseFromString(
+                result.data,
+                "text/html"
+            );
+        
+        const story = doc.querySelector("#section");
+        
+        //Remove script tags
+        story.querySelectorAll("script").forEach(script => {
+            script.remove();
+        });
+
+        // Correct lazy loaded images
+        story.querySelectorAll("img").forEach(img => {
+
+            const src =
+                img.dataset.src ||
+                img.dataset.lazySrc ||
+                img.getAttribute("data-original");
+
+            if (src) {
+                img.src = src;
+            }
+
+        });
+
+
+        story.querySelectorAll(
+            `.ie-ie-share.m-preferred-new,
+            h1[itemprop="headline"],
+            .adboxtop, .main-heading-article, #main-heading-article, .article-main-head, .ie-breadcrumb, .share-box, .share-options, .ie-network-commenting,
+             .alsoread-section, .ie-mobile-ad-carousel, .adboxtop, .desktop-full-ad,
+             .most-read-container, .copyright figure, .storytags,
+             .article-body-readmore,
+             .myie-express-article-widget, .rightpanel `
+        ).forEach(
+            element => element.remove()
+        );
+
+  
+        let articleContent = ``;
+         articleContent += story.innerHTML;
+        articleRoot.innerHTML =
+            articleHead +
+            myToolbar +
+            articleContent;
+
+    } catch (error) {
+
+        console.error(error);
+
+        articleRoot.innerHTML =
+            articleHead + myToolbar +
+            `<div class="empty">
+                Cannot load article
+            </div>`;
+    }
+}
+
+// ==================================================
 // START
 // ==================================================
 
+document.addEventListener("click", event => {
+    const element = event.target.closest(".articles .title");
+
+    if (element){
+
+    let id = element.dataset.id;
+    let url = element.dataset.url;
+    let title = element.textContent.trim();
+
+    if(! (id && url && title))
+    {
+        showAlert(false, "Cannot load article");
+        return;
+    }
+
+    navigate('/article/'+url);
+    return;
+}
+
+const button = event.target.closest(".star");
+
+if(button)
+{
+  vote( button.dataset.id, button );
+  return;
+}
+
+
+});
+
 setCurrentDate();
 clearOldStarred();
-loadArticles();
+resolve();
 
