@@ -577,5 +577,6 @@ function isArticleStarred(articleId) {
 // ==================================================
 
 setCurrentDate();
+clearOldStarred();
 loadArticles();
 

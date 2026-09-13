@@ -3,6 +3,7 @@ import { initializeArticles } from "./articleInitializer.js";
 import { saveArticles } from "./articleSaver.js";
 import { getArticles } from "./articlesAPI.js";
 import { voteArticle } from "./vote.js";
+import { fetchArticle } from "./fetchArticleContent.js";
 
 export default {
 
@@ -128,6 +129,49 @@ export default {
 				);
         }
 
+       if (
+                url.pathname === "/fetch" &&
+                request.method === "GET"
+            ) {
+                const articleURL =
+                    url.searchParams.get("url");
+
+                if (!articleURL) {
+                    return Response.json(
+                        {
+                            success: false,
+                            message: "Article URL is required."
+                        },
+                        { status: 400 }
+                    );
+                }
+
+                try {
+
+                    const article =
+                        await fetchArticle(articleURL);
+
+                    return Response.json({
+                        success: true,
+                        data: article
+                    });
+
+                } catch (error) {
+
+                    console.error(
+                        "Article fetch failed:",
+                        error
+                    );
+
+                    return Response.json(
+                        {
+                            success: false,
+                            message: "Failed to fetch article."
+                        },
+                        { status: 500 }
+                    );
+                }
+            }
 
         return env.ASSETS.fetch(request);
     },
