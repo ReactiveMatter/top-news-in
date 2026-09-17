@@ -147,12 +147,15 @@ export function resolve() {
             query
         });
 
+
         return true;
     }
 
-
+  
     return false;
 }
+
+
 
 /**
  * Navigate to a hash URL.
@@ -164,15 +167,16 @@ export function resolve() {
  * navigate("/?filter=editorial");
  */
 export function navigate(path) {
-     if (path === "/") {
+
+    if (path === "/") {
         history.pushState({}, "", "/");
+        resolve();
     }
     else 
     {
         window.location.hash = path;
     }
-   
-    resolve();
+    
 }
 
 

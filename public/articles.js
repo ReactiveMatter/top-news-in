@@ -8,13 +8,38 @@ import {navigate, resolve, route} from "./router.js"
 
 let articles = [];
 let articlesLoaded = false;
+let backURL = false;
+let scrollY = new Map();
+history.scrollRestoration = "manual";
+
+function restoreScroll()
+{       const key = window.location.hash.slice(1) || "/";
+        if (scrollY.has(key)) {
+        const targetY = scrollY.get(key);
+        requestAnimationFrame(() => {
+            requestAnimationFrame(() => {
+                window.scrollTo(0, targetY);
+            });
+        });
+    }
+}
+
+function saveScrollPos()
+{
+    const key = window.location.hash.slice(1) || "/";
+    if(!key.startsWith('/article/'))
+    {
+        scrollY.set(key, window.scrollY);
+    }
+}
+
 
 route('/', ({params, query})=>{
 
     setFilter('10');
     setView("article-list");
     loadArticles();
-
+    
 });
 
 route('/all', ({params, query})=>{
@@ -32,7 +57,6 @@ route('/editorial', ({params, query})=>{
 route('/explained', ({params, query})=>{
     setFilter('explained');
     setView("article-list");
-
     loadArticles('explained');
 });
 
@@ -65,6 +89,8 @@ function setView(mode="article-list")
     document.querySelectorAll("header").forEach((e)=>{ e.style.display = "none"});
     document.querySelectorAll(".toolbar").forEach((e)=>{ e.style.display = "none"});
     }
+
+    restoreScroll();
 }
 
 
@@ -77,24 +103,44 @@ const filters =
 
 function setCurrentDate() {
 
-    const element =
-        document.getElementById("current-date");
+    const now = new Date();
 
-    if (!element) {
-        return;
+    const parts = new Intl.DateTimeFormat(
+        "en-IN",
+        {
+            timeZone: "Asia/Kolkata",
+            year: "numeric",
+            month: "numeric",
+            day: "numeric",
+            hour: "numeric",
+            hour12: false
+        }
+    ).formatToParts(now);
+
+    const values = Object.fromEntries(
+        parts.map(({ type, value }) => [type, value])
+    );
+
+    const date = new Date(
+        Number(values.year),
+        Number(values.month) - 1,
+        Number(values.day)
+    );
+
+    if (Number(values.hour) < 7) {
+        date.setDate(date.getDate() - 1);
     }
 
-    element.textContent =
+    document.getElementById("current-date").textContent =
         new Intl.DateTimeFormat(
             "en-IN",
             {
                 timeZone: "Asia/Kolkata",
-
                 day: "numeric",
                 month: "long",
                 year: "numeric"
             }
-        ).format(new Date());
+        ).format(date);
 }
 
 function showAlert(success, message) {
@@ -231,14 +277,15 @@ function render(limit) {
 
                         <div class="content">
 
-                            <span
+                            <a
                                 class="title"
+                                href="#/article/${escapeHTML(article.url)}"
                                 data-url="${escapeHTML(article.url)}"
                                 data-id="${article.id}"
                 
                             >
                                 ${escapeHTML(article.title)}
-                            </span>
+                            </a>
 
 
                             <div class="meta">
@@ -294,6 +341,14 @@ function render(limit) {
                 </div>
             `);
             }
+
+
+        // Adding total votes in DOM
+        const totalVotes = articles.reduce(
+            (total, item) => total + Number(item.votes || 0),
+            0
+        );
+        document.getElementById("total-votes").innerHTML = totalVotes;
 }
 
 
@@ -635,7 +690,6 @@ async function displayArticle(articleUrl) {
     if(!articlesLoaded)
     {
         await loadArticles();
-        console.log(articles);
     }
 
    const articleRoot = document.getElementById("article-root");
@@ -683,9 +737,9 @@ async function displayArticle(articleUrl) {
 
     let nav = ``;
 
-    const referrer = document.referrer;
+    
 
-    if (referrer.startsWith(window.location.origin)) {
+    if (backURL) {
         nav = backButton;
     }
     else 
@@ -705,7 +759,6 @@ async function displayArticle(articleUrl) {
         `<div class="empty">Loading article ...</div>`;
 
     try {
-
         const response =
             await fetch(
                 "/fetch?url=" +url
@@ -735,25 +788,29 @@ async function displayArticle(articleUrl) {
         
         const story = doc.querySelector("#section");
         
-        //Remove script tags
-        story.querySelectorAll("script").forEach(script => {
+        //Remove script and style tags
+        story.querySelectorAll("script, style").forEach(script => {
             script.remove();
         });
 
         // Correct lazy loaded images
-        story.querySelectorAll("img").forEach(img => {
+        // story.querySelectorAll("img").forEach(img => {
 
-            const src =
-                img.dataset.src ||
-                img.dataset.lazySrc ||
-                img.getAttribute("data-original");
+        //     const src =
+        //         img.dataset.src ||
+        //         img.dataset.lazySrc ||
+        //         img.getAttribute("data-original");
 
-            if (src) {
-                img.src = src;
-            }
+        //     if (src) {
+        //         img.src = src;
+        //     }
 
+        // });
+
+        //For lazy loading other tags
+        story.querySelectorAll("[data-src]").forEach(element => {
+            element.setAttribute("src", element.dataset.src);
         });
-
 
         story.querySelectorAll(
             `.ie-ie-share.m-preferred-new,
@@ -761,7 +818,8 @@ async function displayArticle(articleUrl) {
             .adboxtop, .main-heading-article, #main-heading-article, .article-main-head, .ie-breadcrumb, .share-box, .share-options, .ie-network-commenting,
              .alsoread-section, .ie-mobile-ad-carousel, .adboxtop, .desktop-full-ad,
              .most-read-container, .copyright figure, .storytags,
-             .article-body-readmore,
+             .article-body-readmore, .ie-newsletter-widget,
+             .mostread-mobile-section, .leave-comment,
              .myie-express-article-widget, .rightpanel `
         ).forEach(
             element => element.remove()
@@ -794,8 +852,9 @@ async function displayArticle(articleUrl) {
 document.addEventListener("click", event => {
     const element = event.target.closest(".articles .title");
 
-    if (element){
 
+    if (element){
+    event.preventDefault();
     let id = element.dataset.id;
     let url = element.dataset.url;
     let title = element.textContent.trim();
@@ -806,6 +865,8 @@ document.addEventListener("click", event => {
         return;
     }
 
+    saveScrollPos();
+    backURL = window.location.pathname;
     navigate('/article/'+url);
     return;
 }

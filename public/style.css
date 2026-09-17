@@ -289,6 +289,9 @@ h1 {
 .about-page .section-nav 
 {
     margin-bottom: 32px;
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
 }
 
 .date {
@@ -586,14 +589,12 @@ to {
 .article-publish-date, .publish-date
 {
     display: flex;
-    gap: 16px;
+    flex-direction: column;
+    gap: 4px;
     flex-wrap: wrap;
+    margin-bottom: 1em;
 }
 
-.article-publish-date > *:not(:first-child)::before, .publish-date > *:not(:first-child)::before {
-    content: "•";
-    margin-right: 16px;
-}
 
 #article-root span.custom-caption, .post-info
 {
@@ -611,7 +612,7 @@ to {
   gap: 8px;
 }
 
-#article-root h2 b 
+#article-root h2 b, #article-root h2 strong
 {
     font-weight: inherit;
 }
@@ -622,7 +623,7 @@ to {
     margin: 16px 0px;
     display: block;
 }
-.ie-custom-caption 
+.ie-custom-caption, .custom-caption 
 {
     color: var(--muted);
     font-size: 0.8em;
@@ -636,12 +637,14 @@ to {
 
 .author-img figure {
   width: 100px;
-  height: auto;
+  height: 100px;
   border-radius: 50px;
   padding: 0px;
   margin: 0px;
   overflow: hidden;
 }
+
+
 
 .author-block 
 {   
@@ -651,9 +654,54 @@ to {
     gap: 8px
 }
 
+
 .author-block .author-name 
 {
     font-weight: bold;
+}
+
+/* IE content CSS */
+.o-story-paper-quite {
+  background: #f9f7f2;
+  margin-bottom: 20px;
+  padding: 15px;
+}
+
+.o-story-paper-quite__label {
+  border-bottom: 1px solid #e5e5e5;
+  display: block;
+  overflow: hidden;
+  font-size: 19px;
+  line-height: 22px;
+  font-weight: 700;
+  position: relative;
+  padding-bottom: 10px;
+  margin-bottom: 15px;
+  color: #fc191d;
+  text-transform: uppercase;
+}
+
+.story-paper-quite .heading-two {
+
+  font-weight: bold;
+}
+
+.twitter-tweet 
+{
+  border: 1px solid #ccc;
+  margin: 0;
+  padding: 10px 15px;
+  border-radius: 5px;
+}
+.twitter-tweet::before 
+{
+  content: "Twitter";
+  font-weight: bold;
+}
+
+iframe 
+{
+    max-width: 100%;
 }
 
 /* MOBILE */

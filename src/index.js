@@ -154,6 +154,11 @@ export default {
                     return Response.json({
                         success: true,
                         data: article
+                    },
+                    {
+                        headers: {
+                            "Cache-Control": "public, max-age=86400, s-maxage=86400"
+                        }
                     });
 
                 } catch (error) {
