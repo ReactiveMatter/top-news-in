@@ -5,6 +5,7 @@ export async function getArticles(env) {
             title,
             url,
             published_time,
+            metadata,
             votes
         FROM articles
         WHERE date = (

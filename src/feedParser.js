@@ -125,6 +125,16 @@ async function parseFeed(
             getTag(item, "pubDate")
         );
 
+        
+        const author = clean(
+            getTag(item, "dc:creator")
+        );
+
+        const categories = getTags(
+            item,
+            "category"
+        ).map(clean);
+
 
         if (!title || !url || !pubDate) {
             continue;
@@ -174,10 +184,13 @@ async function parseFeed(
             published_time:
                 publishedDate.toISOString(),
 
+             metadata: {
+                author: author || null,
+                category: categories,
+            },
+
         });
     }
-
-    console.log(articles);
     return articles;
 }
 
@@ -196,4 +209,16 @@ function getTag(xml, tag) {
     const match = xml.match(regex);
 
     return match ? match[1] : "";
+}
+
+
+function getTags(xml, tag) {
+
+    const regex = new RegExp(
+        `<${tag}(?:\\s[^>]*)?>([\\s\\S]*?)<\\/${tag}>`,
+        "gi"
+    );
+
+    return [...xml.matchAll(regex)]
+        .map(match => match[1]);
 }

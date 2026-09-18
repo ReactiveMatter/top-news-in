@@ -22,6 +22,7 @@
     },
     "economy": {
         "keywords": [
+            "economy",
             "rbi",
             "reserve bank",
             "budget",
@@ -77,6 +78,7 @@
     "elections": {
         "keywords": [
             "election commission",
+            "ec",
             "election results",
             "assembly election",
             "lok sabha election"
@@ -109,7 +111,8 @@
             "Kharge",
             "Rahul Gandhi",
             "Tharoor",
-            "Murmu"
+            "Murmu",
+            "Sitharaman"
         ],
         "score": 1
     }

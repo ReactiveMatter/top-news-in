@@ -13,14 +13,16 @@ export async function saveArticles(articles, db) {
                         url,
                         date,
                         published_time,
+                        metadata,
                         votes
                     )
-                VALUES (?, ?, ?, ?, ?)
+                VALUES (?, ?, ?, ?, ?,?)
             `).bind(
                 article.title,
                 article.url,
                 article.date,
                 article.published_time,
+                JSON.stringify(article.metadata),
                 article.initial_votes
             )
         );

@@ -20,6 +20,10 @@ export function initializeArticles(articles) {
     }));
 }
 
+function escapeRegex(string) {
+    return string.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
 
 // ==================================================
 // INITIAL VOTE CALCULATION
@@ -36,8 +40,10 @@ function calculateInitialVotes(article) {
     for (const rule of Object.values(initializationRules)) {
         let thisRuleScore = 0;
         for (const keyword of rule.keywords) {
+            const pattern =
+                `\\b${escapeRegex(keyword)}\\b`;
 
-            if (text.includes(keyword)) {
+            if (new RegExp(pattern, "i").test(text)) {
                 score += rule.score;
                 thisRuleScore += rule.score;
                 break;
