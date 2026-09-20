@@ -367,7 +367,7 @@ letter-spacing: 0.3px;
     display: flex;
     align-items: center;
     gap: 10px;
-
+    flex-wrap: wrap;
     margin-top: 10px;
 
     color: #8a93a3;

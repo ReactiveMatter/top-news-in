@@ -15,5 +15,14 @@ export async function getArticles(env) {
         ORDER BY votes DESC, published_time DESC
     `).all();
 
-    return Response.json(results);
+
+    const articles = results.map(article => ({
+        ...article,
+        metadata: article.metadata
+            ? JSON.parse(article.metadata)
+            : null
+    }));
+
+
+    return Response.json(articles);
 }

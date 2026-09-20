@@ -60,6 +60,12 @@ route('/explained', ({params, query})=>{
     loadArticles('explained');
 });
 
+route('/upsc', ({params, query})=>{
+    setFilter('upsc');
+    setView("article-list");
+    loadArticles('upsc');
+});
+
 route('/article/:url', ({params, query})=>{
     setView("article-view");
     if(params.url)
@@ -162,6 +168,52 @@ function showAlert(success, message) {
     }, 2500);
 }
 
+function showCategory(category)
+{
+    if(!category)
+    {
+        return '';
+    }
+const priorities = [
+    { return: 'Lifestyle' },
+    { remove: 'Cities' },
+    { return: 'Sports' },
+    { return: 'Entertainment' },
+    { return: 'Trending' },
+    { return: 'World' },
+    { return: 'Explained' },
+    { return: 'Technology' },
+    { remove: 'Opinion' },
+    { return: 'UPSC Essentials' }
+];
+
+
+for (const rule of priorities) {
+
+    if (rule.return) {
+
+        const found = category.find(item =>
+            item.toLowerCase() === rule.return.toLowerCase()
+        );
+
+        if (found) {
+            return found;
+        }
+    }
+
+    if (rule.remove) {
+
+        category = category.filter(item =>
+            item.toLowerCase() !== rule.remove.toLowerCase()
+        );
+    }
+}
+
+return category.join(', ');
+
+   
+   
+}
 
 // ==================================================
 // LOAD ARTICLES
@@ -243,6 +295,16 @@ function render(limit) {
         );
 
     }
+     else if (limit === "upsc") {
+
+       
+       visibleArticles = articles.filter(article =>
+        article.metadata?.category?.some(category =>
+            category.startsWith("UPSC")
+        )
+        );
+
+    }
     
     else {
 
@@ -301,6 +363,29 @@ function render(limit) {
                                         article.published_time
                                     )}
                                 </span>
+
+                                ${
+                                    article.metadata
+                                        ? `
+                                            <span class="meta-divider"></span>
+
+                                            <span class="meta-item">
+                                               ${showCategory(article.metadata.category)}
+                                            </span>
+
+                                            ${
+                                                article.metadata.author
+                                                    ? `
+                                                        <span class="meta-divider"></span>
+                                                        <span class="meta-item">
+                                                            ${article.metadata.author}
+                                                        </span>
+                                                    `
+                                                    : ""
+                                            }
+                                        `
+                                        : ""
+                                }
 
                             </div>
 
