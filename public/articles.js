@@ -33,49 +33,72 @@ function saveScrollPos()
     }
 }
 
+function displayLoading()
+{
+    document.getElementById('app').style.display='none';
+    document.getElementById('loading').style.display='flex';
+}
 
-route('/', ({params, query})=>{
+function displayApp()
+{
 
+    document.getElementById('app').style.display='block';
+    document.getElementById('loading').style.display='none';
+}
+
+route('/', async ({params, query})=>{
+    displayLoading();
     setFilter('10');
     setView("article-list");
-    loadArticles();
+    await loadArticles();
+    displayApp();
     
 });
 
-route('/all', ({params, query})=>{
+route('/all', async ({params, query})=>{
+    displayLoading();
     setFilter('all');
     setView("article-list");
-    loadArticles('all');
+    await loadArticles('all');
+    displayApp();
 });
 
-route('/editorial', ({params, query})=>{
+route('/editorial', async ({params, query})=>{
+    displayLoading();
     setFilter('editorial');
     setView("article-list");
-    loadArticles('editorial');
+    await loadArticles('editorial');
+    displayApp();
 });
 
-route('/explained', ({params, query})=>{
+route('/explained', async ({params, query})=>{
+    displayLoading();
     setFilter('explained');
     setView("article-list");
-    loadArticles('explained');
+    await loadArticles('explained');
+    displayApp();
 });
 
-route('/upsc', ({params, query})=>{
+route('/upsc', async ({params, query})=>{
+    displayLoading();
     setFilter('upsc');
     setView("article-list");
-    loadArticles('upsc');
+    await loadArticles('upsc');
+    displayApp();
 });
 
-route('/article/:url', ({params, query})=>{
+route('/article/:url', async ({params, query})=>{
+    displayLoading();
     setView("article-view");
     if(params.url)
     {
-        displayArticle(params.url);
+        await displayArticle(params.url);
     }
     else 
     {
         document.querySelector("#article-root").innerHTML(`<div class="empty">URL is required.</div>`);
     }
+    displayApp();
     
 });
 
@@ -772,47 +795,99 @@ function isArticleStarred(articleId) {
 // ==================================================
 async function displayArticle(articleUrl) {
 
-    if(!articlesLoaded)
+
+const articleRoot = document.getElementById("article-root");
+  try {
+   let article = false;
+   let article_content = false;
+   const url = articleUrl;
+
+   let result = false;
+   if(!articlesLoaded)
     {
-        await loadArticles();
+      
+        const [response1, response2] = await Promise.all([
+          loadArticles(),
+          fetch("/fetch?url=" +url)
+        ]);
+
+        result = await response2.json();
+        
+       
+    }
+    else 
+    {
+        const response2 = await fetch("/fetch?url=" +url);
+        result = await response2.json();
+    
     }
 
-   const articleRoot = document.getElementById("article-root");
-
-   const article =
-    articles.find(article => {
-        if (article.url === articleUrl) {
-            return true;
-        }
-
-
-        return false;
-    });
-
-
-    if (!article) {
+    if (!result.success) {
         articleRoot.innerHTML =
-            `<div class="empty">Article not found</div>`;
+            `<div class="empty">
+                ${result.message || "Cannot load article"}
+            </div>`;
+
         return;
     }
 
-    const title =
-        article.title;
+    article_content  = result.data;
 
-    const url =
-        articleUrl;
+     const parser =
+            new DOMParser();
+
+    const doc =
+        parser.parseFromString(
+            article_content ,
+            "text/html"
+        );
     
-    const starred =  isArticleStarred(Number(article.id));
-    const starButton = `
-     <button
-    class="star ${starred ? "active" : ""}"
-    data-id="${article.id}"
-    aria-label="Vote for article"
-    title="${starred ? "Already voted" : "Vote"}"
-    ${starred ? "disabled" : ""}
-    >
-    ${starred ? "★" : "☆"}
-    </button>`;
+    const story = doc.querySelector("#section");
+        
+
+
+    article =
+        articles.find(article => {
+            if (article.url === articleUrl) {
+                return true;
+            }
+        });
+
+    let title = '';
+    let starred = false;
+    let starButton = '';
+    
+    if(article)
+    {
+        title = article.title;
+        starred =  isArticleStarred(Number(article.id));
+        starButton = `
+        <button
+        class="star ${starred ? "active" : ""}"
+        data-id="${article.id}"
+        aria-label="Vote for article"
+        title="${starred ? "Already voted" : "Vote"}"
+        ${starred ? "disabled" : ""}
+        >
+        ${starred ? "★" : "☆"}
+        </button>`;
+    }
+    else 
+    {
+       let t =
+    doc.querySelector('.article-main-head') ||
+    doc.querySelector('.main-heading-article') ||
+    doc.querySelector('#main-heading-article');
+
+    if (t) {
+    [...t.children].forEach(child => child.remove());
+    title = t.textContent.trim();
+    } else {
+        title = "";
+    }
+
+}
+    
 
     const articleHead =
         `<h2 class="article-title">${title}</h2>`;
@@ -843,54 +918,14 @@ async function displayArticle(articleUrl) {
         articleHead + myToolbar +
         `<div class="empty">Loading article ...</div>`;
 
-    try {
-        const response =
-            await fetch(
-                "/fetch?url=" +url
-            );
+ 
 
-        const result =
-            await response.json();
-
-        if (!result.success) {
-            articleRoot.innerHTML =
-                articleHead + myToolbar +
-                `<div class="empty">
-                    ${result.message || "Cannot load article"}
-                </div>`;
-
-            return;
-        }
-
-        const parser =
-            new DOMParser();
-
-        const doc =
-            parser.parseFromString(
-                result.data,
-                "text/html"
-            );
-        
-        const story = doc.querySelector("#section");
-        
+       
         //Remove script and style tags
         story.querySelectorAll("script, style").forEach(script => {
             script.remove();
         });
 
-        // Correct lazy loaded images
-        // story.querySelectorAll("img").forEach(img => {
-
-        //     const src =
-        //         img.dataset.src ||
-        //         img.dataset.lazySrc ||
-        //         img.getAttribute("data-original");
-
-        //     if (src) {
-        //         img.src = src;
-        //     }
-
-        // });
 
         //For lazy loading other tags
         story.querySelectorAll("[data-src]").forEach(element => {
@@ -923,7 +958,6 @@ async function displayArticle(articleUrl) {
         console.error(error);
 
         articleRoot.innerHTML =
-            articleHead + myToolbar +
             `<div class="empty">
                 Cannot load article
             </div>`;
